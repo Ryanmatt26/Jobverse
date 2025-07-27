@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Futuristic Job Finder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+      color: #fff;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 3em;
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .search-container input {
+      padding: 10px;
+      width: 60%;
+      border: none;
+      border-radius: 30px;
+      outline: none;
+      font-size: 1em;
+    }
+
+    .jobs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .job-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .job-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .job-card h3 {
+      margin-bottom: 10px;
+      color: #4facfe;
+    }
+
+    .job-card p {
+      font-size: 0.9em;
+      line-height: 1.5em;
+    }
+
+    .apply-btn {
+      margin-top: 15px;
+      display: inline-block;
+      padding: 10px 20px;
+      background: #4facfe;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-decoration: none;
+    }
+
+    .apply-btn:hover {
+      background: #00f2fe;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JobVerse</h1>
+    <p>Explore real-time job opportunities across every field</p>
+  </header>
+
+  <div class="search-container">
+    <input type="text" id="search" placeholder="Search for any job...">
+  </div>
+
+  <div class="jobs" id="jobs">
+    <!-- Jobs will be inserted here -->
+  </div>
+
+  <script>
+    const jobsContainer = document.getElementById('jobs');
+    const searchInput = document.getElementById('search');
+
+    async function fetchJobs(query = "developer jobs") {
+      const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(query)}&page=1&num_pages=1&country=us&date_posted=all`;
+
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-host': 'jsearch.p.rapidapi.com',
+          'x-rapidapi-key': '5c5f1600aamshd2dd6f706cf3227p103dcfjsn2467f2297958'
+        }
+      };
+
+      try {
+        const res = await fetch(url, options);
+        const data = await res.json();
+        renderJobs(data.data || []);
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+        jobsContainer.innerHTML = '<p>Failed to load jobs. Please try again later.</p>';
+      }
+    }
+
+    function renderJobs(jobs) {
+      jobsContainer.innerHTML = "";
+      jobs.forEach(job => {
+        const jobEl = document.createElement('div');
+        jobEl.className = 'job-card';
+        jobEl.innerHTML = `
+          <h3>${job.job_title}</h3>
+          <p><strong>Company:</strong> ${job.employer_name}</p>
+          <p>${job.job_description.substring(0, 150)}...</p>
+          <a class="apply-btn" href="${job.job_apply_link}" target="_blank">Apply</a>
+        `;
+        jobsContainer.appendChild(jobEl);
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      if (query.length > 2) {
+        fetchJobs(query);
+      }
+    });
+
+    // Initial load
+    fetchJobs("developer jobs in chicago");
+  </script>
+</body>
+</html>
